@@ -1,0 +1,86 @@
+[
+  {
+    "file": "doctest.h",
+    "version": "v2.4.11",
+    "url": "https://raw.githubusercontent.com/doctest/doctest/v2.4.11/doctest/doctest.h",
+    "sha256": "44faa038e9c3f9728efbda143748d01124ea0a27f4bf78f35a15d8fab2e039fb",
+    "license": "MIT"
+  },
+  {
+    "file": "json.hpp",
+    "version": "v3.11.3",
+    "url": "https://raw.githubusercontent.com/nlohmann/json/v3.11.3/single_include/nlohmann/json.hpp",
+    "sha256": "9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf103ea6",
+    "license": "MIT"
+  },
+  {
+    "file": "httplib.h",
+    "version": "v0.18.1",
+    "url": "https://raw.githubusercontent.com/yhirose/cpp-httplib/v0.18.1/httplib.h",
+    "sha256": "f870541e065de607c8a7f64fc8743b475cd1388fff5238afa8841f75dcbf2b89",
+    "license": "MIT"
+  },
+  {
+    "package": "node_modules/d3-color",
+    "version": "3.1.0",
+    "license": "ISC",
+    "registry_integrity": "sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA==",
+    "package_manifest_sha256": "3de1c3c467f09ffc0372c8b765f8981535c22e1d9f944d17a35ee37df1033516"
+  },
+  {
+    "package": "node_modules/d3-interpolate",
+    "version": "3.0.1",
+    "license": "ISC",
+    "registry_integrity": "sha512-3bYs1rOD33uo8aqJfKP3JWPAibgw8Zm2+L9vBKEHJ2Rg+viTR7o5Mmv5mZcieN+FRYaAOWX5SJATX6k1PWz72g==",
+    "package_manifest_sha256": "3e2ce33f9d7072b6bfedbae949c1df546e187994e44b6f4b3795abeb63914613"
+  },
+  {
+    "package": "node_modules/d3-scale-chromatic",
+    "version": "3.1.0",
+    "license": "ISC",
+    "registry_integrity": "sha512-A3s5PWiZ9YCXFye1o246KoscMWqf8BsD9eRiJ3He7C9OBaxKhAd5TFCdEx/7VbKtxxTsu//1mMJFrEt572cEyQ==",
+    "package_manifest_sha256": "9d60cf2445659495a3698fa2d8d643a6eb7febcf3ebcede83c3feb260cfa6f82"
+  },
+  {
+    "package": "node_modules/js-tokens",
+    "version": "4.0.0",
+    "license": "MIT",
+    "registry_integrity": "sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==",
+    "package_manifest_sha256": "47345931827b3e26db9fe690abb81f856a0d040cbca8af1e69711a64cd58ce0d"
+  },
+  {
+    "package": "node_modules/loose-envify",
+    "version": "1.4.0",
+    "license": "MIT",
+    "registry_integrity": "sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==",
+    "package_manifest_sha256": "8c2e27dae366396ced36fe0f7c6d35d71a1440fd8e82df5f2005a5297888a0d4"
+  },
+  {
+    "package": "node_modules/react",
+    "version": "18.3.1",
+    "license": "MIT",
+    "registry_integrity": "sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==",
+    "package_manifest_sha256": "d4e68a5c96babb20cad1daafea8b78822eae45b341552cf5418d06a5304fa64c"
+  },
+  {
+    "package": "node_modules/react-dom",
+    "version": "18.3.1",
+    "license": "MIT",
+    "registry_integrity": "sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==",
+    "package_manifest_sha256": "d2f29e31bd48b833e48cd7bbf41f192e8ee4ff8da249fdbe10d4ac4114b8b12e"
+  },
+  {
+    "package": "node_modules/scheduler",
+    "version": "0.23.2",
+    "license": "MIT",
+    "registry_integrity": "sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==",
+    "package_manifest_sha256": "0893643a24576d727174e639586b8833a53f2a7b4a2199a719b9cfcebe9bae88"
+  },
+  {
+    "package": "node_modules/three",
+    "version": "0.180.0",
+    "license": "MIT",
+    "registry_integrity": "sha512-o+qycAMZrh+TsE01GqWUxUIKR1AL0S8pq7zDkYOQw8GqfX8b8VoCKYUoHbhiX5j+7hr8XsuHDVU6+gkQJQKg9w==",
+    "package_manifest_sha256": "aa42494664dba4cf76d89c6975ee38321a402f09a048672e190bad6f13beec93"
+  }
+]
