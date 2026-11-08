@@ -4,6 +4,8 @@ Thermal Atlas is an offline engineering workbench for exploring heat conduction 
 
 The workbench also compares serial and parallel batches, checks backpropagation gradients using finite differences, and simulates device connection and recovery. A Windows launcher starts the local service and opens the interface in the browser.
 
+See [the architecture](docs/ARCHITECTURE.md) for the component boundaries, local request flow, security controls and verification path.
+
 ## Run on Windows 11 — no installation
 
 1. [Download the Windows application ZIP](https://drive.google.com/file/d/11J7EYWGuj1tcgNZ1CyMq7D7HnePdDDJ3/view?usp=sharing). GitHub’s **Code → Download ZIP** contains the source files and requires the build steps below.
