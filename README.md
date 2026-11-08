@@ -4,7 +4,25 @@ Thermal Atlas is an offline engineering workbench for exploring heat conduction 
 
 The workbench also compares serial and parallel batches, checks backpropagation gradients using finite differences, and simulates device connection and recovery. A Windows launcher starts the local service and opens the interface in the browser.
 
-See [the architecture](docs/ARCHITECTURE.md) for the component boundaries, local request flow, security controls and verification path.
+## Architecture
+
+The application runs on your computer: the launcher starts a local server, which serves both the browser interface and the C++ calculation API.
+
+```mermaid
+flowchart TD
+    Launcher["Windows launcher: Launch.exe"] --> Server["Local HTTP server: 127.0.0.1<br/>Session authentication and input validation"]
+    Host["macOS / Linux: browser_host"] --> Server
+    Server --> UI["React + TypeScript interface<br/>Charts, tables and geometry viewer"]
+    UI -->|Local API requests| Server
+    Server --> Core["C++17 numerical core<br/>Heat conduction and backpropagation"]
+    Server --> Jobs["Background jobs<br/>Batch solving and verification"]
+    Jobs --> Core
+    Server --> Parsers["STL / thermal CSV parsers"]
+    Server --> Hardware["Simulated devices<br/>Telemetry and recovery"]
+    UI --> Export["Browser JSON download"]
+```
+
+Calculations and runtime assets stay local; hardware telemetry is simulated. See [the detailed architecture](docs/ARCHITECTURE.md) for component responsibilities, request flow, security controls and verification.
 
 ## Run on Windows 11 — no installation
 

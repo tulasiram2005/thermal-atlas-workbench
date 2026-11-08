@@ -9,8 +9,9 @@ so that numerical work can be tested without a browser or network dependency.
 ```mermaid
 flowchart LR
     User[Engineer on a local computer] --> Launcher[Windows Launch.exe]
-    Launcher --> Server[LocalServer\n127.0.0.1 + random session token]
-    Server --> UI[React + TypeScript interface\nbundled static assets]
+    Launcher --> Server["LocalServer<br/>127.0.0.1 + random session token"]
+    Host["macOS / Linux browser_host"] --> Server
+    Server --> UI["React + TypeScript interface<br/>bundled static assets"]
     UI --> API[Local JSON and binary API]
     API --> Numerics[C++17 numerical core]
     API --> Jobs[Bounded background job queue]
@@ -23,12 +24,15 @@ flowchart LR
     Jobs --> Verify[Module verification jobs]
     Parsers --> Geometry[Geometry and field summaries]
     Hardware --> Telemetry[Simulated telemetry + recovery]
-    FEA --> Results[JSON result or atomic export]
+    FEA --> Results["Local API results"]
     Backprop --> Results
     Batch --> Results
     Geometry --> Results
     Telemetry --> Results
     Results --> UI
+    UI --> Download["Browser JSON download"]
+    CLI["Command-line tools"] --> Numerics
+    CLI --> Export["Atomic local file exports"]
 ```
 
 ## Local request flow
@@ -44,7 +48,7 @@ sequenceDiagram
     L->>S: Start loopback-only server
     S-->>L: Random port and session token
     L->>S: Health check with token
-    L->>W: Open one-time local session URL
+    L->>W: Open local session URL
     W->>S: Cookie-backed request to /api/fea
     S->>C: Validate bounded input and solve mesh
     C-->>S: Temperatures, errors and convergence data
@@ -93,7 +97,7 @@ server and session as the API; it does not call an external service.
 - The server sets content security, frame, MIME-sniffing, referrer and no-store
   response headers.
 - Requests have payload-size limits; FEA input has a shallow JSON shape and
-  mesh-size limit; job count, streaming count and execution time are bounded.
+  mesh-size limit; job capacity, stream count and stream duration are bounded.
 - Static-file serving canonicalises paths and permits only expected asset types.
 - Core numerical code is prevented at build time from importing web/server/OS
   dependencies, preserving its testability and limiting coupling.
