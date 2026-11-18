@@ -17,6 +17,7 @@ flowchart LR
     API --> Jobs[Bounded background job queue]
     API --> Parsers[STL and thermal CSV parsers]
     API --> Hardware[Simulated device adapter]
+    Numerics --> Thermal3D["3D finite volume: cube and neck<br/>Jacobi / Gauss-Seidel / diagonal PCG"]
     Numerics --> FEA[1D finite-element heat solver]
     Numerics --> Backprop[Backpropagation + finite-difference check]
     Numerics --> Batch[Serial/parallel batch solver]
@@ -71,6 +72,12 @@ sequenceDiagram
 | Windows launcher | `Launch/main.cpp` | Single-instance GUI, local service start, health check, browser opening and smoke test. |
 | Browser UI | `web/src/` | React visualisation, forms, charts, geometry view, job progress and result export. |
 | CLI and benchmark | `src/cli/`, `tools/` | Command-line reports, repeatable benchmark, sample-data generation and local browser host. |
+
+## Solver Lab extension
+
+`src/core/thermal3d.*` assembles the same anchored diffusion system for all three methods. `src/cli/solver_evaluate.cpp` measures repeated solves independently of HTTP. The React Solver Lab displays solid-cell temperature fields and true residual histories; JSON export preserves the computed result.
+
+`POST /api/solver-study` validates a bounded interactive resolution (n <= 12). Larger n=24 comparisons use the CLI. The Windows transport patch consumes bounded rejected request bodies before replying; the two-second socket read timeout is per read, not an overall request deadline.
 
 ## API surface
 

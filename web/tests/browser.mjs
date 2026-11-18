@@ -3,7 +3,7 @@ import {spawn} from 'node:child_process';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 const root=resolve('..');
-const child=spawn(resolve(root,'build-release/browser_host'),[resolve('dist')],{stdio:['pipe','pipe','pipe']});
+const child=spawn(resolve(root,process.env.WB_BUILD_DIR||'build-release','browser_host'),[resolve('dist')],{stdio:['pipe','pipe','pipe']});
 let browser;
 const report={checks:[],externalRequests:[],consoleErrors:[],failedResponses:[],passed:false};
 try {
@@ -16,6 +16,7 @@ try {
  page.on('console',msg=>{if(msg.type()==='error')report.consoleErrors.push(msg.text().replace(/token=[^&\s]+/g,'token=REDACTED'))});
  await mkdir(resolve(root,'results/screenshots'),{recursive:true});
  await page.goto(url);
+ await page.getByRole('navigation').getByRole('button',{name:/Thermal/}).click();
  await page.getByRole('heading',{name:'Thermal analysis',exact:true}).waitFor();
  if(new URL(page.url()).search)throw new Error('Session token remained in URL');
  report.checks.push('Authenticated shell loaded; URL cleaned');

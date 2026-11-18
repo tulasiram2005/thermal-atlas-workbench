@@ -138,3 +138,17 @@ TEST_CASE("Verification job reports measured core checks without claiming full a
     REQUIRE(result["checks"].size()==11);
     for(const auto& check:result["checks"])CHECK(check["passed"]==true);
 }
+
+TEST_CASE("3D solver comparison is authenticated and bounded") {
+    wb::LocalServer server; REQUIRE(server.start());
+    httplib::Client client("127.0.0.1",server.port());
+    httplib::Headers headers{{"X-Session-Token",server.token()}};
+    auto r=client.Post("/api/solver-study","{}","application/json");REQUIRE(r);CHECK(r->status==401);
+    r=client.Post("/api/solver-study",headers,"{\"n\":3,\"neck\":true}","application/json");
+    REQUIRE(r);REQUIRE(r->status==200);
+    const auto rows=nlohmann::json::parse(r->body)["runs"];REQUIRE(rows.size()==3);
+    for(const auto& row:rows)CHECK(row["converged"].get<bool>());
+    for(const auto* input:{"[]","{\"n\":13}","{\"n\":3.1}","{\"neck\":1}","{\"x\":1}"}){
+        r=client.Post("/api/solver-study",headers,input,"application/json");REQUIRE(r);CHECK(r->status==400);
+    }
+}

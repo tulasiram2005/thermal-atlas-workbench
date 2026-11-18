@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "core/numerics.hpp"
+#include "core/thermal3d.hpp"
 #include "core/batch.hpp"
 #include "core/verification.hpp"
 #include "core/hardware.hpp"
@@ -28,6 +29,7 @@ LocalServer::LocalServer(std::filesystem::path assets) {
     static constexpr char hex[] = "0123456789abcdef";
     for (int i=0;i<64;++i) token_ += hex[random() & 15U];
     server_.set_payload_max_length(1024 * 1024);
+    server_.set_read_timeout(2, 0);
     server_.new_task_queue = [] { return new httplib::ThreadPool(4); };
     server_.set_pre_routing_handler([this](const httplib::Request& req, httplib::Response& res) {
         res.set_header("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'none'");
@@ -150,6 +152,27 @@ LocalServer::LocalServer(std::filesystem::path assets) {
     });
     server_.Get("/api/health", [](const auto&, auto& res) {
         respond(res,{{"status","ready"},{"mode","offline"}});
+    });
+    server_.Post("/api/solver-study", [](const auto& req, auto& res) {
+        if(req.body.size()>256){error(res,413,"INPUT_TOO_LARGE");return;}
+        const auto j=nlohmann::json::parse(req.body);
+        if(!j.is_object())throw std::invalid_argument("Object required");
+        for(auto it=j.begin();it!=j.end();++it)
+            if(it.key()!="n"&&it.key()!="neck")throw std::invalid_argument("Unknown field");
+        if(j.contains("n")&&!j["n"].is_number_integer())throw std::invalid_argument("Integer required");
+        if(j.contains("neck")&&!j["neck"].is_boolean())throw std::invalid_argument("Boolean required");
+        const int n=j.value("n",6);const bool neck=j.value("neck",false);
+        if(n<3||n>12)throw std::invalid_argument("Interactive limit 3..12");
+        const auto grid=thermal_grid(n,neck);nlohmann::json runs=nlohmann::json::array();
+        for(auto method:{ThermalMethod::Jacobi,ThermalMethod::GaussSeidel,ThermalMethod::PCG}){
+            const auto r=thermal_solve(grid,method);
+            const char* name=method==ThermalMethod::Jacobi?"Jacobi":method==ThermalMethod::GaussSeidel?"Gauss-Seidel":"Diagonal PCG";
+            runs.push_back({{"method",name},{"temperature",r.temperature},{"iterations",r.iterations},
+                {"converged",r.converged},{"relative_residual",r.relative_residual},
+                {"elapsed_ms",r.elapsed_ms},{"outward_heat",r.outward_heat},
+                {"generated_heat",r.generated_heat},{"residual_history",r.residual_history}});
+        }
+        respond(res,{{"n",n},{"neck",neck},{"cells",grid.cells},{"runs",runs}});
     });
     server_.Post("/api/fea", [](const auto& req, auto& res) {
         if (req.body.size()>4096) { error(res,413,"INPUT_TOO_LARGE"); return; }

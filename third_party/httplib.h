@@ -6804,6 +6804,12 @@ inline bool Server::listen_internal() {
 inline bool Server::routing(Request &req, Response &res, Stream &strm) {
   if (pre_routing_handler_ &&
       pre_routing_handler_(req, res) == HandlerResponse::Handled) {
+    // Local patch: consume bounded request content before closing a rejected
+    // request. Unread bytes can cause a TCP reset on Windows and hide the 401.
+    // No route handler is invoked; existing payload limits remain in force.
+    if (detail::expect_content(req) && !read_content(strm, req, res)) {
+      return false;
+    }
     return true;
   }
 

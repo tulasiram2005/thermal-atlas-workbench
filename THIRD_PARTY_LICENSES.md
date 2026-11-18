@@ -8,7 +8,7 @@ Upstream MIT license texts are in third_party/licenses/.
 - cpp-httplib 0.18.1: reserved for the local HTTP transport.
 - Three.js: browser geometry and camera controls.
 
-The C++ numerical implementation is newly authored with Codex assistance.
+The C++ numerical implementation is part of this project.
 
 ## Web foundation
 React/React DOM 18.3.1 (MIT), TypeScript 5.7.3 (Apache-2.0),

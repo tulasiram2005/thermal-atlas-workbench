@@ -4,6 +4,10 @@ Thermal Atlas is an offline engineering workbench for exploring heat conduction 
 
 The workbench also compares serial and parallel batches, checks backpropagation gradients using finite differences, and simulates device connection and recovery. A Windows launcher starts the local service and opens the interface in the browser.
 
+## Solver Lab extension
+
+The 3D cell-centred finite-volume solver compares Jacobi, Gauss-Seidel and diagonal preconditioned conjugate gradients on a cube and a constricted solid. Open **Solver Lab**, choose a geometry, run the comparison and export JSON. The interactive mesh is bounded to 12 cells per axis. Numerical convergence is separate from mesh accuracy; the neck result is not yet mesh-independent.
+
 ## Architecture
 
 The application runs on your computer: the launcher starts a local server, which serves both the browser interface and the C++ calculation API.
@@ -14,7 +18,7 @@ flowchart TD
     Host["macOS / Linux: browser_host"] --> Server
     Server --> UI["React + TypeScript interface<br/>Charts, tables and geometry viewer"]
     UI -->|Local API requests| Server
-    Server --> Core["C++17 numerical core<br/>Heat conduction and backpropagation"]
+    Server --> Core["C++17 numerical core<br/>1D FEM + 3D finite volume<br/>Jacobi / Gauss-Seidel / PCG"]
     Server --> Jobs["Background jobs<br/>Batch solving and verification"]
     Jobs --> Core
     Server --> Parsers["STL / thermal CSV parsers"]
@@ -26,7 +30,7 @@ Calculations and runtime assets stay local; hardware telemetry is simulated. See
 
 ## Run on Windows 11 — no installation
 
-1. [Download the Windows application ZIP](https://drive.google.com/file/d/11J7EYWGuj1tcgNZ1CyMq7D7HnePdDDJ3/view?usp=sharing). GitHub’s **Code → Download ZIP** contains the source files and requires the build steps below.
+1. The linked first-round binary does **not** include the new Solver Lab; build the current source below for the extension. [Download the original Windows application ZIP](https://drive.google.com/file/d/11J7EYWGuj1tcgNZ1CyMq7D7HnePdDDJ3/view?usp=sharing). GitHub’s **Code → Download ZIP** contains the source files and requires the build steps below.
 2. Right-click the application ZIP, choose **Extract All**, and open the extracted folder. Keep `Launch.exe` beside the `web` and `data` folders.
 3. Double-click **Launch.exe**. If SmartScreen prompts and you trust this download, choose **More info → Run anyway**. The launcher opens Thermal Atlas in your default browser. Leave the launcher running while using the app.
 4. Open **Thermal**, leave **Mesh elements** at **10**, and click **Run experiment**. The temperature plot should appear with a midpoint error of **1.25 °C**. Click **Export JSON** and check your downloads for `workbench-result.json`.
@@ -64,3 +68,11 @@ ctest --test-dir build --output-on-failure
 ```
 
 Open the complete local URL printed in Terminal in a browser on the same computer. It signs you into that local session. Keep the URL private. Leave Terminal open while using the app and press Enter there to stop it.
+
+## Reproduce the 3D evaluation
+
+After building, run `./build/solver_evaluate` on macOS/Linux, or `.\build\Release\solver_evaluate.exe` on Windows. Redirect its JSON output to a file: `./build/solver_evaluate > evaluation.json` (PowerShell: `.\build\Release\solver_evaluate.exe | Out-File -Encoding utf8 evaluation.json`). The study compares aligned grids of 6, 12 and 24 cells per axis with warm-up and five measured batches. Timings depend on your hardware; no cloud account is needed.
+
+## Limitations
+
+Hardware telemetry is simulated. The 3D geometry uses Cartesian cells, not a general CAD mesh. Solver timings exclude assembly and browser rendering. The built app needs no external runtime requests; installing build dependencies needs internet access.
