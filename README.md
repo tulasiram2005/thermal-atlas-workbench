@@ -1,50 +1,64 @@
 # Thermal Atlas
 
-Thermal Atlas is an offline engineering workbench for exploring heat conduction and numerical verification. Its C++17 solver computes temperatures along a rod and compares four finite-element meshes against an analytical solution. A local React interface plots temperatures and convergence, displays STL geometry and thermal CSV data, and exports computed results.
+[Open the live Solver Lab](https://thermal-atlas-workbench.vercel.app/) · [Download the complete source ZIP](https://github.com/tulasiram2005/thermal-atlas-workbench/archive/refs/heads/main.zip) · [Architecture guide](docs/ARCHITECTURE.md)
 
-The workbench also compares serial and parallel batches, checks backpropagation gradients using finite differences, and simulates device connection and recovery. A Windows launcher starts the local service and opens the interface in the browser.
+Thermal Atlas is an engineering workbench for studying steady heat conduction. Its **browser Solver Lab** compares three numerical methods on the same solid. Its **desktop workbench** adds a one-dimensional rod experiment with an analytical reference, STL and thermal CSV inspection, serial and parallel batch comparisons, gradient checks, and simulated device connection and recovery.
 
-## Solver Lab extension
+## Try a first experiment
 
-The 3D cell-centred finite-volume solver compares Jacobi, Gauss-Seidel and diagonal preconditioned conjugate gradients on a cube and a constricted solid. Open **Solver Lab**, choose a geometry, run the comparison and export JSON. The interactive mesh is bounded to 12 cells per axis. Numerical convergence is separate from mesh accuracy; the neck result is not yet mesh-independent.
+1. Open the [live demo](https://thermal-atlas-workbench.vercel.app/). Calculations run on your device.
+2. Leave **Constricted block** and grid **6** selected, then choose **Compare solvers**. The default problem has 152 active cells. Jacobi, Gauss–Seidel and diagonal PCG reach the residual tolerance in 169, 86 and 21 iterations respectively.
+3. Select a solver card to inspect its temperature field. Choose a slice axis and move the slider to expose interior cells. Use **Next node** to read a cell's coordinates and temperature. The iteration slider under the chart reports each solver's residual.
+4. Choose **Export evidence** to download the completed study as JSON. If you change the geometry or grid, compare again to enable export for the new settings.
 
-The static browser edition is built separately with `npm --prefix web run build:demo`; it places the WebAssembly worker app in `web/dist-demo`. For a local preview, run `python3 -m http.server 4186 --bind 127.0.0.1 --directory web/dist-demo` and open `http://127.0.0.1:4186`. The demo uses the device's browser worker and does not call the desktop API. The automated browser audit command is `npm --prefix web run test:browser-demo`; it requires Chrome to launch from Playwright. See [the latest verification checkpoint](docs/extension/VERIFICATION_2026-11-18.md) for measured results and deployment-access status.
+Iteration counts describe convergence on the chosen mesh. Browser solve times are single observations and depend on the device. The constricted-block result still depends on mesh resolution.
+
+## Run the browser edition on your laptop
+
+**Requirements:** Node.js 22.19 or later in the 22.x series, npm, and a modern browser. The source includes the compiled WebAssembly module. A C++ compiler is only required for the native workbench.
+
+Download and extract the [source ZIP](https://github.com/tulasiram2005/thermal-atlas-workbench/archive/refs/heads/main.zip). Open a terminal in the extracted **thermal-atlas-workbench-main** folder containing `CMakeLists.txt` and `web/`. Alternatively, use Git:
+
+```sh
+git clone https://github.com/tulasiram2005/thermal-atlas-workbench.git
+cd thermal-atlas-workbench
+```
+
+From the project root, run these commands on Windows, macOS or Linux:
+
+```sh
+npm --prefix web ci
+npm --prefix web run build:demo
+cd web
+npm exec -- vite preview --outDir dist-demo --host 127.0.0.1
+```
+
+Open the **Local** URL printed in the terminal (normally `http://127.0.0.1:4173`). Keep the terminal open and press **Ctrl+C** to stop the preview. Serve the built folder over HTTP so the browser can load its worker and WebAssembly files. Dependency installation requires internet access. After setup, the local preview runs offline.
 
 ## Architecture
 
-The application runs on your computer: the launcher starts a local server, which serves both the browser interface and the C++ calculation API.
-
 ```mermaid
 flowchart TD
-    Launcher["Windows launcher: Launch.exe"] --> Server["Local HTTP server: 127.0.0.1<br/>Session authentication and input validation"]
-    Host["macOS / Linux: browser_host"] --> Server
-    Server --> UI["React + TypeScript interface<br/>Charts, tables and geometry viewer"]
-    UI -->|Local API requests| Server
-    Server --> Core["C++17 numerical core<br/>1D FEM + 3D finite volume<br/>Jacobi / Gauss-Seidel / PCG"]
-    Server --> Jobs["Background jobs<br/>Batch solving and verification"]
-    Jobs --> Core
-    Server --> Parsers["STL / thermal CSV parsers"]
-    Server --> Hardware["Simulated devices<br/>Telemetry and recovery"]
-    UI --> Export["Browser JSON download"]
+    V["Vercel or local static preview"] --> B["Browser Solver Lab · React + TypeScript"]
+    B --> W["Dedicated Web Worker"]
+    W --> M["WebAssembly · C++17 finite-volume solver"]
+    M -->|Temperatures, residuals and heat balance| W
+    W --> B
+    B --> F["Three.js cell field, slices and node inspection"]
+    B --> E["Convergence chart, evidence table and JSON download"]
+    L["Windows launcher or macOS/Linux browser host"] --> S["Loopback HTTP server and session"]
+    S --> D["Desktop React interface"]
+    D -->|Authenticated API calls| S
+    S --> C["Native C++17 core · 1D FEM, 3D finite volume and gradient checks"]
+    S --> J["Bounded jobs · batch and verification"]
+    J --> C
+    S --> P["STL/CSV parsing and simulated devices"]
+    T["Native evaluation CLI"] --> C
 ```
 
-The optional static Solver Lab build follows a separate local-compute path:
+Both 3D editions use the same C++ solver source. Vite builds the browser edition into `web/dist-demo` and the desktop interface into `web/dist`. The desktop server binds to the local machine. [Component map, request flows and verification](docs/ARCHITECTURE.md)
 
-```mermaid
-flowchart LR
-    Browser["React Solver Lab"] --> Worker["Web Worker"]
-    Worker --> Wasm["C++17 finite-volume solver compiled to WebAssembly"]
-    Wasm --> Compare["Jacobi / Gauss-Seidel / diagonal PCG"]
-    Compare --> UI["Temperature field, residual history and table"]
-    UI --> Download["JSON evidence download"]
-    Vercel["Static hosting: web/dist-demo"] --> Browser
-```
-
-The browser build is independent of the local desktop HTTP service. Its content security policy allows only same-origin assets and the WebAssembly execution mode required by the worker. The browser requests no remote calculation service.
-
-Calculations and runtime assets stay local; hardware telemetry is simulated. See [the detailed architecture](docs/ARCHITECTURE.md) for component responsibilities, request flow, security controls and verification.
-
-## Run on Windows 11 — no installation
+## Run the original Windows 11 package
 
 1. The linked first-round binary does **not** include the new Solver Lab; build the current source below for the extension. [Download the original Windows application ZIP](https://drive.google.com/file/d/11J7EYWGuj1tcgNZ1CyMq7D7HnePdDDJ3/view?usp=sharing). GitHub’s **Code → Download ZIP** contains the source files and requires the build steps below.
 2. Right-click the application ZIP, choose **Extract All**, and open the extracted folder. Keep `Launch.exe` beside the `web` and `data` folders.
@@ -52,15 +66,13 @@ Calculations and runtime assets stay local; hardware telemetry is simulated. See
 4. Open **Thermal**, leave **Mesh elements** at **10**, and click **Run experiment**. The temperature plot should appear with a midpoint error of **1.25 °C**. Click **Export JSON** and check your downloads for `workbench-result.json`.
 5. To try the 3D view, open **Geometry** and select `data/thermal_rod.csv` from the extracted folder. To stop the local service, click **Quit** in the launcher.
 
-## Build from source
+## Build the current desktop workbench from source
 
 Install Git, Node.js 22.19 or later in the 22.x series, npm, CMake 3.20 or newer, and a C++17 compiler. On Windows use Visual Studio 2022 with **Desktop development with C++**. For the macOS/Linux commands below, install Ninja. The dependency installation needs internet access; the built application runs locally.
 
-Clone the project and build the interface first on all platforms:
+Extract the source ZIP or clone the repository as described above. Start in the project root (if you are still in `web/`, run `cd ..`). Build the desktop interface before configuring CMake:
 
 ```sh
-git clone https://github.com/tulasiram2005/thermal-atlas-workbench.git
-cd thermal-atlas-workbench
 npm --prefix web ci
 npm --prefix web run build
 ```

@@ -31,6 +31,8 @@ flowchart LR
     Geometry --> Results
     Telemetry --> Results
     Results --> UI
+    Thermal3D --> Results
+    Verify --> Results
     UI --> Download["Browser JSON download"]
     CLI["Command-line tools"] --> Numerics
     CLI --> Export["Atomic local file exports"]
@@ -153,7 +155,7 @@ evidence, see the project results and verification documentation.
 
 ## Static browser Solver Lab
 
-The optional browser edition is built with `npm --prefix web run build:demo` and published from `web/dist-demo`. It calls the same C++ thermal solver compiled to WebAssembly, running in a dedicated Web Worker. The desktop application continues to use the loopback HTTP API and native C++ library; the static demo does not require or contact that API.
+The [live browser edition](https://thermal-atlas-workbench.vercel.app/) is built with `npm --prefix web run build:demo` and published from `web/dist-demo`. It calls the same C++ thermal solver compiled to WebAssembly, running in a dedicated Web Worker. The desktop application continues to use the loopback HTTP API and native C++ library; the static demo does not require or contact that API.
 
 ```mermaid
 flowchart LR
@@ -167,4 +169,17 @@ flowchart LR
     App --> Export["Client-side JSON download"]
 ```
 
-The static build has a restrictive same-origin content security policy with the browser's WebAssembly execution permission. It makes no external calculation requests and sends no data to a server. The interactive grid is limited to 12 cells per axis; larger evaluation grids run through the native CLI. Current build, parity, browser and deployment-access evidence is recorded in [the 18 November verification checkpoint](extension/VERIFICATION_2026-11-18.md).
+The static build has a restrictive same-origin content security policy with the browser's WebAssembly execution permission. It makes no external calculation requests and sends no data to a server. The interactive grid is limited to 12 cells per axis; larger evaluation grids run through the native CLI. The [verification checkpoint](extension/VERIFICATION_2026-11-18.md) records the initial deployment checks.
+
+### Browser components
+
+| Component | Role |
+|---|---|
+| `web/src/demo.tsx` | Tracks requested settings separately from the completed study, selects the displayed solver and exports its complete study JSON. Stale settings disable export until the next comparison. |
+| `web/src/browser-solver.ts` and `web/public/wasm/worker.mjs` | Send the grid and geometry to a dedicated worker, validate the request and return results to the interface. |
+| `src/cli/browser_bridge.cpp` and `src/core/thermal3d.cpp` | Expose the shared 3D calculation to the browser module and native comparison tool. |
+| `web/src/ThermalField.tsx` | Displays computed temperatures with instanced cells, clipping planes, camera presets, keyboard inspection and a static fallback. |
+| `web/src/ResidualChart.tsx` | Plots the recorded residual histories on a logarithmic scale and reads values at a selected iteration. |
+| `vercel.json` | Configures the static build, published directory and security headers. |
+
+Theme, motion, slicing and display rounding belong to the presentation layer. They do not modify the exported numerical results. For downloads, prerequisites and platform-specific commands, see the [run guide](../README.md).
