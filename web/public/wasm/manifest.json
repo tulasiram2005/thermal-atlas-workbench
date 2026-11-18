@@ -1,0 +1,10 @@
+{
+  "compiler": "Emscripten 4.0.10",
+  "files": {
+    "src/core/thermal3d.cpp": "52b7d8c84963ca6b7dea4441bb748fbfe6a906e777f0484712e7151825045496",
+    "src/core/thermal3d.hpp": "e71bd87d8fd75bbd1258e97a066108b8e63aef8725828d37ff970427ff2fec0f",
+    "src/cli/browser_bridge.cpp": "fd6710ea8eced00e2e86319b050b69ead8f1a5c72b6e0196630b97a2e1c0dff8",
+    "web/public/wasm/thermal.mjs": "5713872c646a9a6e7407cb8451c9b36590189427a6271957ea7980ca821676c2",
+    "web/public/wasm/thermal.wasm": "6c73c05527a32521b44ac072f360029ba497b678782501ab65b90f42e97faed4"
+  }
+}

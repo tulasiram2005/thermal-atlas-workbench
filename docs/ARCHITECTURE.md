@@ -150,3 +150,21 @@ convergence for this midpoint measure.
 
 For setup and execution commands, see the [README](../README.md). For numerical
 evidence, see the project results and verification documentation.
+
+## Static browser Solver Lab
+
+The optional browser edition is built with `npm --prefix web run build:demo` and published from `web/dist-demo`. It calls the same C++ thermal solver compiled to WebAssembly, running in a dedicated Web Worker. The desktop application continues to use the loopback HTTP API and native C++ library; the static demo does not require or contact that API.
+
+```mermaid
+flowchart LR
+    Static["Static host: web/dist-demo"] --> App["React + TypeScript Solver Lab"]
+    App --> Worker["Same-origin Web Worker"]
+    Worker --> Wasm["C++17 solver module"]
+    Wasm --> Matrix["Bounded finite-volume matrix"]
+    Matrix --> Solvers["Jacobi / Gauss-Seidel / diagonal PCG"]
+    Solvers --> Result["Temperature field + residuals + heat balance"]
+    Result --> App
+    App --> Export["Client-side JSON download"]
+```
+
+The static build has a restrictive same-origin content security policy with the browser's WebAssembly execution permission. It makes no external calculation requests and sends no data to a server. The interactive grid is limited to 12 cells per axis; larger evaluation grids run through the native CLI. Current build, parity, browser and deployment-access evidence is recorded in [the 18 November verification checkpoint](extension/VERIFICATION_2026-11-18.md).

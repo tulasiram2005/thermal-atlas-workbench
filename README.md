@@ -8,6 +8,8 @@ The workbench also compares serial and parallel batches, checks backpropagation 
 
 The 3D cell-centred finite-volume solver compares Jacobi, Gauss-Seidel and diagonal preconditioned conjugate gradients on a cube and a constricted solid. Open **Solver Lab**, choose a geometry, run the comparison and export JSON. The interactive mesh is bounded to 12 cells per axis. Numerical convergence is separate from mesh accuracy; the neck result is not yet mesh-independent.
 
+The static browser edition is built separately with `npm --prefix web run build:demo`; it places the WebAssembly worker app in `web/dist-demo`. For a local preview, run `python3 -m http.server 4186 --bind 127.0.0.1 --directory web/dist-demo` and open `http://127.0.0.1:4186`. The demo uses the device's browser worker and does not call the desktop API. The automated browser audit command is `npm --prefix web run test:browser-demo`; it requires Chrome to launch from Playwright. See [the latest verification checkpoint](docs/extension/VERIFICATION_2026-11-18.md) for measured results and deployment-access status.
+
 ## Architecture
 
 The application runs on your computer: the launcher starts a local server, which serves both the browser interface and the C++ calculation API.
@@ -25,6 +27,20 @@ flowchart TD
     Server --> Hardware["Simulated devices<br/>Telemetry and recovery"]
     UI --> Export["Browser JSON download"]
 ```
+
+The optional static Solver Lab build follows a separate local-compute path:
+
+```mermaid
+flowchart LR
+    Browser["React Solver Lab"] --> Worker["Web Worker"]
+    Worker --> Wasm["C++17 finite-volume solver compiled to WebAssembly"]
+    Wasm --> Compare["Jacobi / Gauss-Seidel / diagonal PCG"]
+    Compare --> UI["Temperature field, residual history and table"]
+    UI --> Download["JSON evidence download"]
+    Vercel["Static hosting: web/dist-demo"] --> Browser
+```
+
+The browser build is independent of the local desktop HTTP service. Its content security policy allows only same-origin assets and the WebAssembly execution mode required by the worker. The browser requests no remote calculation service.
 
 Calculations and runtime assets stay local; hardware telemetry is simulated. See [the detailed architecture](docs/ARCHITECTURE.md) for component responsibilities, request flow, security controls and verification.
 

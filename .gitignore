@@ -11,3 +11,7 @@ web/dist/
 
 __pycache__/
 *.partial
+
+web/dist-demo/
+.vercel/
+.netlify/
