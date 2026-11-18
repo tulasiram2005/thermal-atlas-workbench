@@ -25,7 +25,7 @@ await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const base='http://127.0.0.1:'+server.address().port;
 let browser;
 try {
-  browser=await chromium.launch({channel:'chrome',args:['--remote-debugging-port=9338']});
+  browser=await chromium.launch({channel:process.env.THERMAL_HEADLESS?'chromium-headless-shell':'chrome',args:['--remote-debugging-port=9338']});
   const page=await browser.newPage({viewport:{width:360,height:800},deviceScaleFactor:1});
   const errors=[];
   page.on('pageerror',e=>errors.push(String(e)));
@@ -38,8 +38,9 @@ try {
   // Count instanced field draws during the same sequence of pointer movements.
   await page.evaluate(()=>{
     const proto=WebGL2RenderingContext.prototype, draw=proto.drawElementsInstanced;
-    window.frameTimes=[];
-    proto.drawElementsInstanced=function(...args){if(args[4]===152)window.frameTimes.push(performance.now());return draw.apply(this,args)};
+    let drew=false;window.frameTimes=[];
+    const sample=now=>{if(drew){window.frameTimes.push(now);drew=false}requestAnimationFrame(sample)};requestAnimationFrame(sample);
+    proto.drawElementsInstanced=function(...args){if(args[4]===152)drew=true;return draw.apply(this,args)};
   });
   const box=await canvas.boundingBox(), x=box.x+box.width/2,y=box.y+box.height/2;
   await page.mouse.move(x,y); await page.mouse.down();
